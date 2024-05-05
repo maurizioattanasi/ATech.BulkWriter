@@ -1,5 +1,7 @@
 using System.Data.SqlClient;
 
+using ATech.BulkWriter.Extensions;
+
 using Microsoft.Extensions.Logging;
 
 namespace ATech.BulkWriter;
@@ -28,7 +30,7 @@ public class BulkWriter<TEntity> : IBulkWriter<TEntity>
 
     public void AddRange(IEnumerable<TEntity> entities, string? tableName = null)
     {
-       try
+        try
         {
             if (!entities.Any()) return;
 
@@ -58,9 +60,9 @@ public class BulkWriter<TEntity> : IBulkWriter<TEntity>
         }
     }
 
-    public Task AddRangeAsync(IEnumerable<TEntity> entities, string? tableName = null, CancellationToken cancellationToken = default)
+    public async Task AddRangeAsync(IEnumerable<TEntity> entities, string? tableName = null, CancellationToken cancellationToken = default)
     {
-         try
+        try
         {
             if (!entities.Any()) return;
 

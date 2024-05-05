@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace ATech.BulkWriter;
+namespace ATech.BulkWriter.Extensions;
 
 public static class IEnumerableExtensions
 {
