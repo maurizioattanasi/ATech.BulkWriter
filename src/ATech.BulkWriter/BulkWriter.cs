@@ -28,12 +28,66 @@ public class BulkWriter<TEntity> : IBulkWriter<TEntity>
 
     public void AddRange(IEnumerable<TEntity> entities, string? tableName = null)
     {
-        throw new NotImplementedException();
+       try
+        {
+            if (!entities.Any()) return;
+
+            var table = entities.ToDataTable();
+
+            _connection.Open();
+
+            using var bulkCopy = new SqlBulkCopy(_connection);
+
+            bulkCopy.BatchSize = table.Rows.Count;
+            bulkCopy.BulkCopyTimeout = 0;
+
+            bulkCopy.DestinationTableName = $"{_schema}.{tableName ?? typeof(TEntity).Name}";
+
+            bulkCopy.WriteToServer(table);
+
+            bulkCopy.Close();
+        }
+        catch (Exception ex)
+        {
+            var content = ex.InnerException is null ? ex.Message : ex.InnerException.Message;
+            _logger.LogError(ex, content);
+        }
+        finally
+        {
+            _connection.Close();
+        }
     }
 
     public Task AddRangeAsync(IEnumerable<TEntity> entities, string? tableName = null, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+         try
+        {
+            if (!entities.Any()) return;
+
+            var table = entities.ToDataTable();
+
+            await _connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+            using var bulkCopy = new SqlBulkCopy(_connection);
+
+            bulkCopy.BatchSize = table.Rows.Count;
+            bulkCopy.BulkCopyTimeout = 0;
+
+            bulkCopy.DestinationTableName = $"{_schema}.{tableName ?? typeof(TEntity).Name}";
+
+            await bulkCopy.WriteToServerAsync(table, cancellationToken).ConfigureAwait(false);
+
+            bulkCopy.Close();
+        }
+        catch (Exception ex)
+        {
+            var content = ex.InnerException is null ? ex.Message : ex.InnerException.Message;
+            _logger.LogError(ex, content);
+        }
+        finally
+        {
+            await _connection.CloseAsync();
+        }
     }
 
     public void Dispose() => _connection.Dispose();
