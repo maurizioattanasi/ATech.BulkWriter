@@ -1,96 +1,48 @@
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 using ATech.BulkWriter.Extensions;
 
-using Microsoft.Extensions.Logging;
-
 namespace ATech.BulkWriter;
 
-public class BulkWriter<TEntity> : IBulkWriter<TEntity>
+public sealed class BulkWriter<TEntity> : IBulkWriter<TEntity>
 {
-    private readonly SqlConnection _connection;
-    private readonly ILogger<BulkWriter<TEntity>> _logger;
+    private readonly SqlBulkCopy _sqlBulkCopy;
 
-    private readonly string _schema;
-
-
-    public BulkWriter(SqlConnection connection, ILogger<BulkWriter<TEntity>> logger, string schema = "dbo")
+    public BulkWriter(SqlConnection connection, string? tableName = null, string schema = "dbo")
     {
-        _connection = connection;
-        _logger = logger;
-
-        _connection.InfoMessage += (s, e) =>
-        {
-            foreach (SqlError error in e.Errors)
-                _logger.LogError(error.Message);
-        };
-        _schema = schema;
-
+        _sqlBulkCopy = new SqlBulkCopy(connection);
+        _sqlBulkCopy.DestinationTableName = $"{schema}.{tableName ?? typeof(TEntity).Name}";
     }
 
-    public void AddRange(IEnumerable<TEntity> entities, string? tableName = null)
+        public int BatchSize
     {
-        try
-        {
-            if (!entities.Any()) return;
-
-            var table = entities.ToDataTable();
-
-            _connection.Open();
-
-            using var bulkCopy = new SqlBulkCopy(_connection);
-
-            bulkCopy.BatchSize = table.Rows.Count;
-            bulkCopy.BulkCopyTimeout = 0;
-
-            bulkCopy.DestinationTableName = $"{_schema}.{tableName ?? typeof(TEntity).Name}";
-
-            bulkCopy.WriteToServer(table);
-
-            bulkCopy.Close();
-        }
-        catch (Exception ex)
-        {
-            var content = ex.InnerException is null ? ex.Message : ex.InnerException.Message;
-            _logger.LogError(ex, content);
-        }
-        finally
-        {
-            _connection.Close();
-        }
+        get => _sqlBulkCopy.BatchSize;
+        set => _sqlBulkCopy.BatchSize = value;
     }
 
-    public async Task AddRangeAsync(IEnumerable<TEntity> entities, string? tableName = null, CancellationToken cancellationToken = default)
+    public int BulkCopyTimeout
     {
-        try
-        {
-            if (!entities.Any()) return;
-
-            var table = entities.ToDataTable();
-
-            await _connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
-            using var bulkCopy = new SqlBulkCopy(_connection);
-
-            bulkCopy.BatchSize = table.Rows.Count;
-            bulkCopy.BulkCopyTimeout = 0;
-
-            bulkCopy.DestinationTableName = $"{_schema}.{tableName ?? typeof(TEntity).Name}";
-
-            await bulkCopy.WriteToServerAsync(table, cancellationToken).ConfigureAwait(false);
-
-            bulkCopy.Close();
-        }
-        catch (Exception ex)
-        {
-            var content = ex.InnerException is null ? ex.Message : ex.InnerException.Message;
-            _logger.LogError(ex, content);
-        }
-        finally
-        {
-            await _connection.CloseAsync();
-        }
+        get => _sqlBulkCopy.BulkCopyTimeout;
+        set => _sqlBulkCopy.BulkCopyTimeout = value;
     }
 
-    public void Dispose() => _connection.Dispose();
+    public void AddRange(IEnumerable<TEntity> entities)
+    {
+        if (!entities.Any()) return;
+
+        var table = entities.ToDataTable();
+
+        _sqlBulkCopy.WriteToServer(table);
+    }
+
+    public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    {
+        if (!entities.Any()) return;
+
+        var table = entities.ToDataTable();
+
+        await _sqlBulkCopy.WriteToServerAsync(table, cancellationToken).ConfigureAwait(false);
+    }
+
+    public void Dispose() => ((IDisposable)_sqlBulkCopy).Dispose();
 }

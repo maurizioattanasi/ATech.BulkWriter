@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E2E71414-B37
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATech.BulkWriter", "src\ATech.BulkWriter\ATech.BulkWriter.csproj", "{0112BED1-CA04-430B-8399-57CEE20CCF48}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmark", "benchmark", "{5E99C591-D321-4700-9490-E64667FA267B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATech.BulkWriter.Benchmark", "benchmark\ATech.BulkWriter.Benchmark\ATech.BulkWriter.Benchmark.csproj", "{2055E365-5944-435B-B883-590FDDC2638E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,13 @@ Global
 		{0112BED1-CA04-430B-8399-57CEE20CCF48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0112BED1-CA04-430B-8399-57CEE20CCF48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0112BED1-CA04-430B-8399-57CEE20CCF48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2055E365-5944-435B-B883-590FDDC2638E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2055E365-5944-435B-B883-590FDDC2638E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2055E365-5944-435B-B883-590FDDC2638E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2055E365-5944-435B-B883-590FDDC2638E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0112BED1-CA04-430B-8399-57CEE20CCF48} = {E2E71414-B373-4D54-BCE8-819C0967CD49}
+		{2055E365-5944-435B-B883-590FDDC2638E} = {5E99C591-D321-4700-9490-E64667FA267B}
 	EndGlobalSection
 EndGlobal
