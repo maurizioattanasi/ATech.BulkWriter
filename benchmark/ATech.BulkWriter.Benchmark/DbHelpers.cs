@@ -7,10 +7,11 @@ namespace ATech.BulkWriter.Benchmark;
 
 internal static class DbHelpers
 {
-    private const string SetupConnectionString = "Data Source=.\\;Trusted_Connection=True;";
-
-    private const string ConnectionString = "Data Source=.\\;Trusted_Connection=True;Initial Catalog=BulkWriter.Benchmark";
     private const string DbName = "BulkWriter.Benchmark";
+
+    private const string SetupConnectionString = "Data Source=localhost,6433;User ID=sa;Password=P@ssw0rd;TrustServerCertificate=True";
+
+    private const string ConnectionString = $"Data Source=localhost,6433;Initial Catalog={DbName};User ID=sa;Password=P@ssw0rd;TrustServerCertificate=True";
 
     internal static SqlConnection OpenSqlConnection()
     {
@@ -30,6 +31,20 @@ internal static class DbHelpers
 
         DropTable<DomainEntity>(sqlConnection);
         CreateDomainEntitiesTable(sqlConnection);
+    }
+
+    internal static void DisposeDatabase()
+    {
+        using var sqlConnection = new SqlConnection(SetupConnectionString);
+        sqlConnection.Open();
+        DropDatabase(sqlConnection);
+    }
+
+    internal static void DropDatabase(SqlConnection sqlConnection)
+    {
+        var dropDatabaseQuery = $"IF EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = N'{DbName}') DROP DATABASE [{DbName}]";
+        using var command = new SqlCommand(dropDatabaseQuery, sqlConnection);
+        command.ExecuteNonQuery();
     }
 
     internal static void CreateDatabase(SqlConnection sqlConnection)
