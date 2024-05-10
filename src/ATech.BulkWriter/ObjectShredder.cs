@@ -1,14 +1,14 @@
 using System.Data;
 using System.Reflection;
 
-namespace Mermec.Localization.Infrastructure.Common.Persistence;
+namespace ATech.BulkWriter;
 
 public class ObjectShredder<T>
 {
-    private readonly System.Reflection.FieldInfo[] _fi;
-    private readonly System.Reflection.PropertyInfo[] _pi;
-    private readonly System.Collections.Generic.Dictionary<string, int> _ordinalMap;
-    private readonly System.Type _type;
+    private readonly FieldInfo[] _fi;
+    private readonly PropertyInfo[] _pi;
+    private readonly Dictionary<string, int> _ordinalMap;
+    private readonly Type _type;
 
     // ObjectShredder constructor.
     public ObjectShredder()
@@ -79,7 +79,7 @@ public class ObjectShredder<T>
         table.BeginLoadData();
         using (IEnumerator<T> e = source.GetEnumerator())
         {
-            Object[] values = new object[table.Columns.Count];
+            object[] values = new object[table.Columns.Count];
             while (e.MoveNext())
             {
                 values[table.Columns["Value"].Ordinal] = e.Current;
@@ -115,7 +115,7 @@ public class ObjectShredder<T>
         }
 
         // Add the property and field values of the instance to an array.
-        Object[] values = new object[table.Columns.Count];
+        object[] values = new object[table.Columns.Count];
         foreach (FieldInfo f in fi)
         {
             values[_ordinalMap[f.Name]] = f.GetValue(instance);
@@ -147,7 +147,7 @@ public class ObjectShredder<T>
                 _ordinalMap.Add(f.Name, dc.Ordinal);
             }
         }
-        
+
         // Virtual properties are not included in the table schema.
         foreach (PropertyInfo p in type.GetProperties().Where(p => !p.SetMethod?.IsVirtual ?? false).OrderBy(p => p.MetadataToken))
         {
