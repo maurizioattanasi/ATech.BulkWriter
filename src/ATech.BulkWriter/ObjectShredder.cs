@@ -1,7 +1,7 @@
 using System.Data;
 using System.Reflection;
 
-namespace ATech.BulkWriter;
+namespace Mermec.Localization.Infrastructure.Common.Persistence;
 
 public class ObjectShredder<T>
 {
@@ -15,7 +15,7 @@ public class ObjectShredder<T>
     {
         _type = typeof(T);
         _fi = _type.GetFields();
-        _pi = _type.GetProperties();
+        _pi = _type.GetProperties().Where(p => !(p.SetMethod?.IsVirtual ?? false)).ToArray();
         _ordinalMap = new Dictionary<string, int>();
     }
 
@@ -147,7 +147,9 @@ public class ObjectShredder<T>
                 _ordinalMap.Add(f.Name, dc.Ordinal);
             }
         }
-        foreach (PropertyInfo p in type.GetProperties().OrderBy(p => p.MetadataToken))
+        
+        // Virtual properties are not included in the table schema.
+        foreach (PropertyInfo p in type.GetProperties().Where(p => !p.SetMethod?.IsVirtual ?? false).OrderBy(p => p.MetadataToken))
         {
             if (!_ordinalMap.ContainsKey(p.Name))
             {
